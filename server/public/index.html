@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR code login</title>
+</head>
+
+<body>
+  <h1>QRcode</h1>
+  <p id="message"></p>
+  <button id="disconnect">disconnect</button>
+  <button id="reconnect">reconnect</button>
+  <script>
+    const disconnectEl = document.getElementById('disconnect');
+    const reconnectEl = document.getElementById('reconnect');
+
+    function init() {
+      const message = document.getElementById('message');
+      const ws = new WebSocket(`ws://${location.host}`);
+
+      ws.onmessage = function (event) {
+        const data = JSON.parse(event.data);
+
+        message.textContent = data.msg;
+      };
+
+      ws.onclose = function () {
+        message.textContent = 'disconnect';
+      }
+
+      disconnectEl.onclick = function () {
+        ws.close();
+      }
+    };
+
+    reconnectEl.onclick = function () {
+      init();
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

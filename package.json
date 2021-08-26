@@ -4,14 +4,16 @@
   "description": "websocket for scanning QRcode login",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:ser": "nodemon server/index.js"
   },
   "author": "wangcch",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.17.1",
     "ws": "^8.2.0"
   },
   "devDependencies": {
+    "nodemon": "^2.0.12",
     "prettier": "^2.3.2"
   }
 }
