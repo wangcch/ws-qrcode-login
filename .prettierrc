@@ -1,0 +1,16 @@
+{
+  "useTabs": false,
+  "printWidth": 120,
+  "tabWidth": 4,
+  "trailingComma": "all",
+  "jsxBracketSameLine": true,
+  "overrides": [
+    {
+      "files": ["**/*.json", ".prettierrc"],
+      "options": {
+        "tabWidth": 2,
+        "parser": "json"
+      }
+    }
+  ]
+}
