@@ -27,6 +27,10 @@
         message.textContent = data.msg;
       };
 
+      ws.onopen = function () {
+        ws.send(JSON.stringify({ type: "server", code: 0 }))
+      }
+
       ws.onclose = function () {
         message.textContent = 'disconnect';
       }

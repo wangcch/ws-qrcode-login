@@ -4,7 +4,8 @@
   "description": "websocket for scanning QRcode login",
   "main": "index.js",
   "scripts": {
-    "dev:ser": "nodemon server/index.js"
+    "dev:ser": "nodemon server/index.js",
+    "dev:app": "nodemon client/index.js"
   },
   "author": "wangcch",
   "license": "MIT",
