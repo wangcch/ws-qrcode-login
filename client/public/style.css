@@ -1,0 +1,65 @@
+html,
+body {
+    font-family: "Apercu", Avenir, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, "Calibri", "Roboto",
+        Arial, sans-serif;
+    font-size: 14px;
+    padding: 0;
+    margin: 0;
+}
+* {
+    font-family: inherit;
+}
+body {
+    height: 100vh;
+}
+
+@supports (-webkit-touch-callout: none) {
+    body {
+        height: -webkit-fill-available;
+    }
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.none {
+    display: none;
+}
+
+.container {
+    max-width: 520px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 16px;
+    flex-direction: column;
+}
+
+#message {
+    flex: 1 1;
+    font-size: 1.2rem;
+}
+
+#login-btn {
+    width: 100%;
+    padding: 1.1875rem 1.4375rem;
+    font-size: 1rem;
+    background: #0000ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 0.25rem;
+}
+
+#login-btn:active {
+    background-color: #000099;
+    border-color: #000099;
+}
+
+#login-btn:disabled {
+    background-color: #99f;
+    color: hsl(0deg 0% 100% / 40%);
+    cursor: not-allowed;
+}
