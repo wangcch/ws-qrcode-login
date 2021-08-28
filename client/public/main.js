@@ -7,7 +7,9 @@ function setLoginBtnLoading(msg = "......") {
     loginBtnEl.textContent = msg;
 }
 function setLoginBtnReset() {
-    loginBtnEl.attributes.removeNamedItem("disabled");
+    if (loginBtnEl.attributes.getNamedItem("disabled")) {
+        loginBtnEl.attributes.removeNamedItem("disabled");
+    }
     loginBtnEl.textContent = "Login";
 }
 
@@ -20,23 +22,30 @@ function init() {
 
         ws.onmessage = function (event) {
             const data = JSON.parse(event.data);
-            console.info(data);
-            if (data && data.data) {
-                switch (data.data.step) {
-                    case 1:
-                        loginBtnEl.className = "";
-                        msgEl.textContent = data.msg;
-                        break;
-                    case -1:
-                        loginBtnEl.className = "none";
-                        msgEl.textContent = data.msg;
-                        break;
+            if (data) {
+                if (data.code === 0) {
+                    switch (data.data.step) {
+                        case 1:
+                            loginBtnEl.className = "";
+                            msgEl.textContent = data.msg;
+                            break;
+                        case 2:
+                            loginBtnEl.className = "none";
+                            msgEl.textContent = data.msg;
+                            ws.close();
+                            break;
+                    }
+                } else {
+                    loginBtnEl.className = "none";
+                    msgEl.textContent = data.msg;
+                    setLoginBtnReset();
+                    ws.close();
                 }
             }
         };
 
         ws.onopen = function () {
-            ws.send(JSON.stringify({ type: "client", token: params.t }));
+            ws.send(JSON.stringify({ type: "client", step: 0, token: params.t }));
         };
 
         loginBtnEl.onclick = function () {
@@ -44,10 +53,8 @@ function init() {
                 setLoginBtnLoading();
                 console.info("login...");
 
-                // TODO
-                setTimeout(() => {
-                    setLoginBtnReset();
-                }, 1000);
+                // TODO userId
+                ws.send(JSON.stringify({ type: "client", step: 1, userId: new Date().valueOf() }));
             }
         };
     } else {
