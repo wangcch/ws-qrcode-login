@@ -6,11 +6,16 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR code login</title>
+  <script src="https://www.unpkg.com/qrcode@1.4.4/build/qrcode.min.js"></script>
 </head>
 
 <body>
   <h1>QRcode</h1>
   <p id="message"></p>
+  <p id="userInfo"></p>
+  <div>
+    <canvas id="canvas"></canvas>
+  </div>
   <button id="disconnect">disconnect</button>
   <button id="reconnect">reconnect</button>
   <script>
@@ -18,21 +23,45 @@
     const reconnectEl = document.getElementById('reconnect');
 
     function init() {
-      const message = document.getElementById('message');
+      const messageEl = document.getElementById('message');
+      const userInfoEl = document.getElementById('userInfo');
+      const qrcodeEl = document.getElementById('canvas');
       const ws = new WebSocket(`ws://${location.host}`);
 
       ws.onmessage = function (event) {
         const data = JSON.parse(event.data);
+        messageEl.textContent = data.msg;
 
-        message.textContent = data.msg;
+        const step = data.data && data.data.step;
+
+        if (step === 0) {
+          const anchor = document.createElement('a');
+          anchor.href = data.data.url;
+          anchor.setAttribute("target", "_blank");
+          anchor.setAttribute("rel", "noopener noreferrer");
+          anchor.textContent = 'link';
+          anchor.style = "margin-left: 8px;";
+          messageEl.appendChild(anchor);
+
+          QRCode.toCanvas(qrcodeEl, data.data.url, function (error) {
+            if (error) console.error(error)
+            console.log('QR code generated successfully');
+          })
+        } else if (step === 2) {
+          userInfoEl.textContent = `userId: ${data.data.userId}`;
+
+          const ctx = qrcodeEl.getContext('2d');
+          ctx.clearRect(0, 0, qrcodeEl.width, qrcodeEl.height);
+          ws.close();
+        }
       };
 
       ws.onopen = function () {
-        ws.send(JSON.stringify({ type: "server", code: 0 }))
+        ws.send(JSON.stringify({ type: "server", code: 0, step: 0 }))
       }
 
       ws.onclose = function () {
-        message.textContent = 'disconnect';
+        messageEl.textContent = 'disconnect';
       }
 
       disconnectEl.onclick = function () {

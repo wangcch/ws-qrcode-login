@@ -7,6 +7,9 @@ const { networkInterfaces } = require("os");
 
 const WebSocket = require("ws");
 
+const jwt = require("jsonwebtoken");
+const uuidV4 = require("uuid").v4;
+
 const app = express();
 app.use(express.static(path.join(__dirname, "/public")));
 
@@ -14,6 +17,9 @@ const PORT = 8001;
 const IP = Object.values(networkInterfaces())
     .flat()
     .find((i) => i.family == "IPv4" && !i.internal).address;
+
+// memory cache
+const cache = new Map();
 
 const server = createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -30,11 +36,67 @@ wss.on("connection", (ws, socket) => {
                 const type = body && body.type;
 
                 if (type === "client") {
-                    setTimeout(() => {
-                        client.send(JSON.stringify({ code: 0, data: { step: 1 }, msg: "Ready" }));
-                    }, 600);
+                    switch (body.step) {
+                        case 0:
+                            const token = body.token;
+
+                            try {
+                                const decoded = jwt.verify(token, "ws-qr-login");
+                                if (decoded) {
+                                    const itemCache = cache.get(decoded.uuid);
+                                    if (itemCache && itemCache.status === 0) {
+                                        cache.set(decoded.uuid, { ...itemCache, child: client, status: 1 });
+                                        itemCache.parent.send(
+                                            JSON.stringify({
+                                                code: 0,
+                                                data: { step: 1 },
+                                                msg: "Scan code successfully",
+                                            }),
+                                        );
+                                        setTimeout(() => {
+                                            client.send(JSON.stringify({ code: 0, data: { step: 1 }, msg: "Ready" }));
+                                        }, 600);
+                                        return;
+                                    } else {
+                                        cache.set(decoded.uuid, -1);
+                                    }
+                                }
+                                client.send(JSON.stringify({ code: -1, msg: "Expired" }));
+                            } catch (e) {
+                                client.send(JSON.stringify({ code: -1, msg: "Expired" }));
+                            }
+                            break;
+                        case 1:
+                            cache.forEach((v) => {
+                                if (v.child === client) {
+                                    v.parent.send(
+                                        JSON.stringify({
+                                            code: 0,
+                                            data: { step: 2, userId: body.userId },
+                                            msg: "Already logged in",
+                                        }),
+                                    );
+                                }
+                            });
+                            client.send(JSON.stringify({ code: 0, data: { step: 2 }, msg: "Login successful" }));
+                    }
                 } else if (type === "server") {
-                    client.send(JSON.stringify({ code: 0, data: { step: 0 }, msg: "Ready" }));
+                    switch (body.step) {
+                        case 0:
+                            const uuid = uuidV4();
+                            const token = jwt.sign({ uuid }, "ws-qr-login", { expiresIn: "1m" });
+
+                            cache.set(uuid, { status: 0, parent: client });
+
+                            client.send(
+                                JSON.stringify({
+                                    code: 0,
+                                    data: { step: 0, url: `http://${IP}:8002?t=${token}` },
+                                    msg: "Ready",
+                                }),
+                            );
+                            break;
+                    }
                 }
             }
         });
