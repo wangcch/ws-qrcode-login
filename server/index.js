@@ -3,20 +3,24 @@
 const express = require("express");
 const path = require("path");
 const { createServer } = require("http");
-const { networkInterfaces } = require("os");
 
 const WebSocket = require("ws");
 
 const jwt = require("jsonwebtoken");
 const uuidV4 = require("uuid").v4;
 
+const auth = require("./auth");
+
 const app = express();
+
+app.use(auth.sessionRequestHandler);
+app.use(auth.authRouter);
+app.use(auth.authMiddleware);
+
 app.use(express.static(path.join(__dirname, "/public")));
 
 const PORT = 8001;
-const IP = Object.values(networkInterfaces())
-    .flat()
-    .find((i) => i.family == "IPv4" && !i.internal).address;
+const IP = require("../utils/ip")();
 
 // memory cache
 const cache = new Map();
@@ -72,7 +76,7 @@ wss.on("connection", (ws, socket) => {
                                     v.parent.send(
                                         JSON.stringify({
                                             code: 0,
-                                            data: { step: 2, userId: body.userId },
+                                            data: { step: 2, username: body.username },
                                             msg: "Already logged in",
                                         }),
                                     );

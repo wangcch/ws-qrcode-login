@@ -1,4 +1,5 @@
 const msgEl = document.getElementById("message");
+const usernameEL = document.getElementById("username");
 const loginBtnEl = document.getElementById("login-btn");
 
 function setLoginBtnLoading(msg = "......") {
@@ -13,7 +14,7 @@ function setLoginBtnReset() {
     loginBtnEl.textContent = "Login";
 }
 
-function init() {
+function linkWS(username) {
     const qs = Qs;
     const params = qs.parse(window.location.search, { ignoreQueryPrefix: true });
 
@@ -53,13 +54,31 @@ function init() {
                 setLoginBtnLoading();
                 console.info("login...");
 
-                // TODO userId
-                ws.send(JSON.stringify({ type: "client", step: 1, userId: new Date().valueOf() }));
+                ws.send(JSON.stringify({ type: "client", step: 1, username }));
             }
         };
     } else {
         msgEl.textContent = "Unable to verify";
     }
+}
+
+function init() {
+    fetch(`http://${location.hostname}:8001/user`, { credentials: "include" })
+        .then((res) => res.json())
+        .then((res) => {
+            if (res.code === 0) {
+                const username = res.data.username;
+                usernameEL.textContent = `username: ${username}`;
+
+                linkWS(username);
+            } else {
+                window.location.pathname = `/login`;
+            }
+        })
+        .catch((rea) => {
+            console.error("[user] err: %o", rea);
+            window.location.pathname = `/login`;
+        });
 }
 
 init();

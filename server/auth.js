@@ -12,7 +12,7 @@ const sessionRequestHandler = session({
     secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 2 * 60 * 1000 },
+    cookie: { maxAge: 60 * 60 * 1000 },
 });
 
 const authMiddleware = (req, res, next) => {
