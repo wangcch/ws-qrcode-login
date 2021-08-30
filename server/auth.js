@@ -22,8 +22,30 @@ const userCache = new Map();
 // TODO Auto destruction
 let tokenCache = [];
 
+function genSessionToken(username) {
+    if (username) {
+        const token = jwt.sign({ username }, SESSION_SECRET, { expiresIn: SESSION_MAX_AGE });
+        return token;
+    }
+    return null;
+}
+
+function updateSessionToken(username) {
+    if (username && userCache.get(username)) {
+        const token = genSessionToken(username);
+
+        const user = userCache.get(username);
+        userCache.set(username, { ...user, token });
+        tokenCache.push(token);
+
+        return token;
+    }
+
+    return null;
+}
+
 const authMiddleware = (req, res, next) => {
-    const token = req.session.userToken || req.headers["Authorization"];
+    const token = req.session.userToken || req.headers["authorization"];
     const isCached = !!tokenCache.find((t) => t === token);
 
     if (token && isCached) {
@@ -65,7 +87,7 @@ authRouter.post("/login", (req, res) => {
         const { username, password } = body;
         const user = userCache.get(username);
 
-        const token = jwt.sign({ username }, SESSION_SECRET, { expiresIn: SESSION_MAX_AGE });
+        const token = genSessionToken(username);
         if (user) {
             // TODO Password
             if (user.password === body.password) {
@@ -101,4 +123,5 @@ module.exports = {
     sessionRequestHandler,
     authMiddleware,
     authRouter,
+    updateSessionToken,
 };

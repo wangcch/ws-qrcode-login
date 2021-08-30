@@ -73,10 +73,11 @@ wss.on("connection", (ws, socket) => {
                         case 1:
                             cache.forEach((v) => {
                                 if (v.child === client) {
+                                    const token = auth.updateSessionToken(body.username);
                                     v.parent.send(
                                         JSON.stringify({
                                             code: 0,
-                                            data: { step: 2, username: body.username },
+                                            data: { step: 2, username: body.username, token },
                                             msg: "Already logged in",
                                         }),
                                     );

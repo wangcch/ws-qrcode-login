@@ -1,11 +1,37 @@
 const disconnectEl = document.getElementById("disconnect");
 const reconnectEl = document.getElementById("reconnect");
+const userInfoEl = document.getElementById("user-info");
+
+const TOKEN_KEY = "SESSION_TOKEN";
+
+function fetchUser() {
+    fetch(`http://${location.hostname}:8001/user`, {
+        headers: {
+            Authorization: localStorage.getItem(TOKEN_KEY),
+        },
+        credentials: "include",
+    })
+        .then((res) => res.json())
+        .then((res) => {
+            if (res.code === 0) {
+                const { username } = res.data;
+                userInfoEl.textContent = username;
+            } else {
+                userInfoEl.textContent = "";
+            }
+        })
+        .catch((rea) => {
+            console.error("[user] err: %o", rea);
+            userInfoEl.textContent = "";
+        });
+}
 
 function init() {
     const messageEl = document.getElementById("message");
-    const userInfoEl = document.getElementById("userInfo");
     const qrcodeEl = document.getElementById("canvas");
     const ws = new WebSocket(`ws://${location.host}`);
+
+    fetchUser();
 
     ws.onmessage = function (event) {
         const data = JSON.parse(event.data);
@@ -27,12 +53,14 @@ function init() {
                 console.log("QR code generated successfully");
             });
         } else if (step === 2) {
-            userInfoEl.textContent = `username: ${data.data.username}`;
+            const { username, token } = data.data;
+            userInfoEl.textContent = username;
+
+            localStorage.setItem(TOKEN_KEY, token);
 
             const ctx = qrcodeEl.getContext("2d");
             ctx.clearRect(0, 0, qrcodeEl.width, qrcodeEl.height);
             ws.close();
-            // requestUser();
         }
     };
 
