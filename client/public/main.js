@@ -1,6 +1,7 @@
 const msgEl = document.getElementById("message");
-const usernameEL = document.getElementById("username");
+const userInfoEl = document.getElementById("user-info");
 const loginBtnEl = document.getElementById("login-btn");
+const logoutBtnEl = document.getElementById("logout-btn");
 
 function setLoginBtnLoading(msg = "......") {
     const attr = document.createAttribute("disabled");
@@ -68,7 +69,7 @@ function init() {
         .then((res) => {
             if (res.code === 0) {
                 const username = res.data.username;
-                usernameEL.textContent = `username: ${username}`;
+                userInfoEl.textContent = username;
 
                 linkWS(username);
             } else {
@@ -79,6 +80,18 @@ function init() {
             console.error("[user] err: %o", rea);
             window.location.pathname = `/login`;
         });
+
+    logoutBtnEl.onclick = function () {
+        fetch(`http://${location.hostname}:8001/logout`, { method: "POST", credentials: "include" })
+            .then((res) => {
+                if (res.status === 200) {
+                    window.location.pathname = `/login`;
+                }
+            })
+            .catch((rea) => {
+                console.error("[logout] err: %o", rea);
+            });
+    };
 }
 
 init();

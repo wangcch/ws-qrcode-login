@@ -13,5 +13,5 @@ const app = express();
 app.use(express.static(path.join(__dirname, "/public")));
 
 app.listen(PORT, "0.0.0.0", () => {
-    console.info(`Listening on\n\thttp://localhost:${PORT}\n\thttp://${IP}:${PORT}`);
+    console.info(`Listening on\n\thttp://${IP}:${PORT}`);
 });
