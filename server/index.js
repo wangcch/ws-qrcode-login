@@ -13,11 +13,11 @@ const auth = require("./auth");
 
 const app = express();
 
+app.use(express.static(path.join(__dirname, "/public")));
+
 app.use(auth.sessionRequestHandler);
 app.use(auth.authRouter);
 app.use(auth.authMiddleware);
-
-app.use(express.static(path.join(__dirname, "/public")));
 
 const PORT = 8001;
 const IP = require("../utils/ip")();
