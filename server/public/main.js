@@ -1,37 +1,62 @@
-const disconnectEl = document.getElementById("disconnect");
-const reconnectEl = document.getElementById("reconnect");
 const userInfoEl = document.getElementById("user-info");
+const userStatusEl = document.getElementById("user-status");
+const userMsgEl = document.getElementById("user-msg");
+
+const loginEl = document.getElementById("login-container");
+const logoutBtnEl = document.getElementById("logout-btn");
+
+const reconnectEl = document.getElementById("reconnect");
 
 const TOKEN_KEY = "SESSION_TOKEN";
 
 function fetchUser() {
-    fetch(`http://${location.hostname}:8001/user`, {
-        headers: {
-            Authorization: localStorage.getItem(TOKEN_KEY),
-        },
-        credentials: "include",
-    })
-        .then((res) => res.json())
-        .then((res) => {
-            if (res.code === 0) {
-                const { username } = res.data;
-                userInfoEl.textContent = username;
-            } else {
-                userInfoEl.textContent = "";
-            }
+    return new Promise((resolve, reject) => {
+        fetch(`http://${location.hostname}:8001/user`, {
+            headers: {
+                Authorization: localStorage.getItem(TOKEN_KEY),
+            },
         })
-        .catch((rea) => {
-            console.error("[user] err: %o", rea);
-            userInfoEl.textContent = "";
-        });
+            .then((res) => {
+                userStatusEl.textContent = res.status;
+                userMsgEl.textContent = res.statusText;
+                loginEl.style = "display: none";
+                return res.json();
+            })
+            .then((res) => {
+                if (res.msg) {
+                    userMsgEl.textContent = res.msg;
+                }
+
+                if (res.code === 0) {
+                    const { username } = res.data;
+                    userInfoEl.textContent = username;
+
+                    resolve({ username });
+                } else {
+                    loginEl.style = "display: block";
+                    userInfoEl.textContent = "";
+                    reject(res);
+                }
+            })
+            .catch((rea) => {
+                console.error("[user] err: %o", rea);
+                loginEl.style = "display: block";
+                userInfoEl.textContent = "";
+
+                if (rea.msg) {
+                    userMsgEl.textContent = rea.msg;
+                }
+
+                reject(rea);
+            });
+    });
 }
 
-function init() {
+function linkWS() {
+    const disconnectEl = document.getElementById("disconnect");
     const messageEl = document.getElementById("message");
     const qrcodeEl = document.getElementById("canvas");
     const ws = new WebSocket(`ws://${location.host}`);
-
-    fetchUser();
 
     ws.onmessage = function (event) {
         const data = JSON.parse(event.data);
@@ -54,13 +79,13 @@ function init() {
             });
         } else if (step === 2) {
             const { username, token } = data.data;
-            userInfoEl.textContent = username;
-
             localStorage.setItem(TOKEN_KEY, token);
 
             const ctx = qrcodeEl.getContext("2d");
             ctx.clearRect(0, 0, qrcodeEl.width, qrcodeEl.height);
             ws.close();
+
+            fetchUser();
         }
     };
 
@@ -77,8 +102,35 @@ function init() {
     };
 }
 
+logoutBtnEl.onclick = function () {
+    fetch(`http://${location.hostname}:8001/logout`, {
+        method: "POST",
+        headers: {
+            Authorization: localStorage.getItem(TOKEN_KEY),
+        },
+    })
+        .then((res) => {
+            console.info("Logout.", res);
+            fetchUser();
+        })
+        .catch((e) => {
+            console.error("Logout error.", e);
+        });
+};
+
 reconnectEl.onclick = function () {
     init();
 };
+
+function init() {
+    fetchUser()
+        .then((res) => {
+            console.info(res);
+            // ignore
+        })
+        .catch((rea) => {
+            linkWS();
+        });
+}
 
 init();

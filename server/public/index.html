@@ -10,14 +10,26 @@
 </head>
 
 <body>
-  <h1>QRcode</h1>
-  <p id="message"></p>
-  <p id="user-info"></p>
+  <h1>WS QRcode Login</h1>
   <div>
-    <canvas id="canvas"></canvas>
+    <p>
+      username: <b id="user-info"></b>
+      <br>
+      status: <span id="user-status"></span>
+      msg: <span id="user-msg"></span>
+    </p>
+    <button id="logout-btn">logout</button>
   </div>
-  <button id="disconnect">disconnect</button>
-  <button id="reconnect">reconnect</button>
+
+  <hr>
+  <div id="login-container" style="display: none">
+    <p id="message"></p>
+    <div>
+      <canvas id="canvas"></canvas>
+    </div>
+    <button id="disconnect">disconnect</button>
+    <button id="reconnect">reconnect</button>
+  </div>
   <script src="./main.js"></script>
 </body>
 

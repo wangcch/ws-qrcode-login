@@ -57,10 +57,11 @@ const authMiddleware = (req, res, next) => {
             }
         } catch (e) {
             console.error("[authMiddleware] catch: %o", e);
+            return res.status(401).json({ msg: "Token expired" });
         }
     }
 
-    return res.sendStatus(401);
+    return res.status(401).json({ msg: "Access denied" });
 };
 
 const authRouter = express.Router();
@@ -108,7 +109,7 @@ authRouter.post("/login", (req, res) => {
     }
 });
 authRouter.post("/logout", (req, res) => {
-    const token = req.session.userToken || req.headers["Authorization"];
+    const token = req.session.userToken || req.headers["authorization"];
 
     if (token) {
         req.session && req.session.destroy();
