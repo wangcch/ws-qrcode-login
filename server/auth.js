@@ -67,20 +67,26 @@ const authMiddleware = (req, res, next) => {
 const authRouter = express.Router();
 
 authRouter.use(express.json());
-authRouter.use(
-    cors({
-        origin: `http://${IP}:8002`,
+authRouter.use((req, res, next) => {
+    const host = req.headers.host;
+    // [dev] dynamic origin
+    const origin = new RegExp(`^${IP}`).test(host) ? req.headers.origin : "*";
+
+    return cors({
+        origin,
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         preflightContinue: false,
         credentials: true,
-    }),
-);
+    })(req, res, next);
+});
+
 authRouter.get("/user", authMiddleware, (req, res) => {
     if (req.session.username) {
         return res.json({ code: 0, data: { username: req.session.username } });
     }
     return res.sendStatus(404);
 });
+
 authRouter.post("/login", (req, res) => {
     const body = req.body;
 
@@ -108,6 +114,7 @@ authRouter.post("/login", (req, res) => {
         return res.sendStatus(400);
     }
 });
+
 authRouter.post("/logout", (req, res) => {
     const token = req.session.userToken || req.headers["authorization"];
 
