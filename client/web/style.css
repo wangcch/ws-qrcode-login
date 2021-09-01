@@ -1,0 +1,61 @@
+html,
+body {
+    font-family: "Apercu", Avenir, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, "Calibri", "Roboto",
+        Arial, sans-serif;
+    font-size: 14px;
+    padding: 1rem;
+    margin: 0;
+}
+
+* {
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.none {
+    display: none;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: #ffffff;
+    border: 1px solid #d9d9d9;
+    cursor: pointer;
+}
+
+button[class~="full"] {
+    width: 100%;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+button:active {
+    background-color: #d9d9d9;
+}
+
+button:hover {
+    border-color: #0000ff;
+}
+
+#message {
+    margin: 0.5rem 0;
+}
+
+#qr-canvas {
+    border: 1px solid #d9d9d9;
+    border-radius: 0.25rem;
+}
+
+.container {
+    max-width: 720px;
+    padding: 2rem;
+    border: 1px solid #d9d9d9;
+    border-radius: 0.25rem;
+    display: flex;
+    justify-content: space-between;
+}

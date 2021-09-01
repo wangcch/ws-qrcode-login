@@ -6,29 +6,32 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR code login</title>
+  <link href="./style.css" rel="stylesheet">
   <script src="https://www.unpkg.com/qrcode@1.4.4/build/qrcode.min.js"></script>
 </head>
 
 <body>
   <h1>WS QRcode Login</h1>
-  <div>
-    <p>
-      username: <b id="user-info"></b>
-      <br>
-      status: <span id="user-status"></span>
-      msg: <span id="user-msg"></span>
-    </p>
-    <button id="logout-btn">logout</button>
-  </div>
-
-  <hr>
-  <div id="login-container" style="display: none">
-    <p id="message"></p>
-    <div>
-      <canvas id="canvas"></canvas>
+  <div class="container">
+    <div class="user-container">
+      <p>
+        username: <b id="user-info"></b>
+        <br>
+        status: <span id="user-status"></span>
+        msg: <span id="user-msg"></span>
+      </p>
+      <button id="logout-btn">logout</button>
     </div>
-    <button id="disconnect">disconnect</button>
-    <button id="reconnect">reconnect</button>
+
+    <div id="login-container" class="none">
+      <div>
+        <canvas id="qr-canvas"></canvas>
+        <p id="message"></p>
+      </div>
+      websocket:
+      <button id="disconnect">disconnect</button>
+      <button id="reconnect">reconnect</button>
+    </div>
   </div>
   <script src="./main.js"></script>
 </body>

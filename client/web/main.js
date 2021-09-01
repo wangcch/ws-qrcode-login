@@ -9,6 +9,17 @@ const reconnectEl = document.getElementById("reconnect");
 
 const TOKEN_KEY = "SESSION_TOKEN";
 
+function setUserState(logged) {
+    if (logged) {
+        loginEl.className = "none";
+        logoutBtnEl.className = "";
+    } else {
+        loginEl.className = "";
+        logoutBtnEl.className = "none";
+        userInfoEl.textContent = "null";
+    }
+}
+
 function fetchUser() {
     return new Promise((resolve, reject) => {
         fetch(`http://${location.hostname}:8001/user`, {
@@ -19,7 +30,7 @@ function fetchUser() {
             .then((res) => {
                 userStatusEl.textContent = res.status;
                 userMsgEl.textContent = res.statusText;
-                loginEl.style = "display: none";
+
                 return res.json();
             })
             .then((res) => {
@@ -30,18 +41,19 @@ function fetchUser() {
                 if (res.code === 0) {
                     const { username } = res.data;
                     userInfoEl.textContent = username;
+                    setUserState(true);
 
                     resolve({ username });
                 } else {
-                    loginEl.style = "display: block";
-                    userInfoEl.textContent = "";
+                    setUserState(false);
+
                     reject(res);
                 }
             })
             .catch((rea) => {
                 console.error("[user] err: %o", rea);
-                loginEl.style = "display: block";
-                userInfoEl.textContent = "";
+
+                setUserState(false);
 
                 if (rea.msg) {
                     userMsgEl.textContent = rea.msg;
@@ -55,7 +67,7 @@ function fetchUser() {
 function linkWS() {
     const disconnectEl = document.getElementById("disconnect");
     const messageEl = document.getElementById("message");
-    const qrcodeEl = document.getElementById("canvas");
+    const qrcodeEl = document.getElementById("qr-canvas");
     const ws = new WebSocket(`ws://${location.hostname}:8001`);
 
     ws.onmessage = function (event) {
@@ -111,7 +123,7 @@ logoutBtnEl.onclick = function () {
     })
         .then((res) => {
             console.info("Logout.", res);
-            fetchUser();
+            init();
         })
         .catch((e) => {
             console.error("Logout error.", e);
@@ -119,7 +131,7 @@ logoutBtnEl.onclick = function () {
 };
 
 reconnectEl.onclick = function () {
-    init();
+    linkWS();
 };
 
 function init() {
