@@ -1,7 +1,6 @@
 "use strict";
 
 const express = require("express");
-const path = require("path");
 const { createServer } = require("http");
 
 const WebSocket = require("ws");
@@ -12,8 +11,6 @@ const uuidV4 = require("uuid").v4;
 const auth = require("./auth");
 
 const app = express();
-
-app.use(express.static(path.join(__dirname, "/public")));
 
 app.use(auth.sessionRequestHandler);
 app.use(auth.authRouter);
@@ -96,7 +93,7 @@ wss.on("connection", (ws, socket) => {
                             client.send(
                                 JSON.stringify({
                                     code: 0,
-                                    data: { step: 0, url: `http://${IP}:8002?t=${token}` },
+                                    data: { step: 0, url: `http://${IP}:8003?t=${token}` },
                                     msg: "Ready",
                                 }),
                             );

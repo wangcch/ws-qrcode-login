@@ -56,7 +56,7 @@ function linkWS() {
     const disconnectEl = document.getElementById("disconnect");
     const messageEl = document.getElementById("message");
     const qrcodeEl = document.getElementById("canvas");
-    const ws = new WebSocket(`ws://${location.host}`);
+    const ws = new WebSocket(`ws://${location.hostname}:8001`);
 
     ws.onmessage = function (event) {
         const data = JSON.parse(event.data);
